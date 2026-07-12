@@ -1,0 +1,540 @@
+--[[
+    Pulse Visual - Защита кодом "vovcik"
+    Fly, Tornado, Universal All Game, Ultra Instinct, Invisible, Admin Panel
+]]
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+
+-- === ПРОВЕРКА КОДА ===
+local function checkCode()
+    local correctCode = "vovcik"
+    local inputCode = ""
+    
+    -- Создаем окошко для ввода
+    local codeGui = Instance.new("ScreenGui")
+    codeGui.Name = "CodeGui"
+    codeGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    codeGui.ResetOnSpawn = false
+    
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 350, 0, 180)
+    mainFrame.Position = UDim2.new(0.5, -175, 0.5, -90)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 25)
+    mainFrame.BackgroundTransparency = 0.1
+    mainFrame.BorderSizePixel = 2
+    mainFrame.BorderColor3 = Color3.fromRGB(0, 150, 255)
+    mainFrame.ClipsDescendants = true
+    mainFrame.Parent = codeGui
+    mainFrame.ZIndex = 20
+    
+    local mainCorner = Instance.new("UICorner")
+    mainCorner.CornerRadius = UDim.new(0, 20)
+    mainCorner.Parent = mainFrame
+    
+    -- Заголовок
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 50)
+    title.Position = UDim2.new(0, 0, 0, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "🔐 ВВЕДИТЕ КОД"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 22
+    title.Parent = mainFrame
+    title.ZIndex = 21
+    
+    -- Поле ввода
+    local inputBox = Instance.new("TextBox")
+    inputBox.Size = UDim2.new(0.8, 0, 0, 40)
+    inputBox.Position = UDim2.new(0.1, 0, 0, 55)
+    inputBox.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+    inputBox.BackgroundTransparency = 0.3
+    inputBox.BorderSizePixel = 1
+    inputBox.BorderColor3 = Color3.fromRGB(0, 150, 255)
+    inputBox.PlaceholderText = "Введите код доступа..."
+    inputBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 200)
+    inputBox.Text = ""
+    inputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    inputBox.Font = Enum.Font.Gotham
+    inputBox.TextSize = 16
+    inputBox.Parent = mainFrame
+    inputBox.ZIndex = 21
+    inputBox.ClearTextOnFocus = false
+    
+    local inputCorner = Instance.new("UICorner")
+    inputCorner.CornerRadius = UDim.new(0, 10)
+    inputCorner.Parent = inputBox
+    
+    -- Кнопка подтверждения
+    local confirmBtn = Instance.new("TextButton")
+    confirmBtn.Size = UDim2.new(0.3, 0, 0, 40)
+    confirmBtn.Position = UDim2.new(0.35, 0, 0, 105)
+    confirmBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+    confirmBtn.BackgroundTransparency = 0.2
+    confirmBtn.BorderSizePixel = 0
+    confirmBtn.Text = "▶ ВОЙТИ"
+    confirmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    confirmBtn.Font = Enum.Font.GothamBold
+    confirmBtn.TextSize = 16
+    confirmBtn.Parent = mainFrame
+    confirmBtn.ZIndex = 21
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 10)
+    btnCorner.Parent = confirmBtn
+    
+    -- Результат
+    local resultLabel = Instance.new("TextLabel")
+    resultLabel.Size = UDim2.new(1, 0, 0, 30)
+    resultLabel.Position = UDim2.new(0, 0, 0, 155)
+    resultLabel.BackgroundTransparency = 1
+    resultLabel.Text = ""
+    resultLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+    resultLabel.Font = Enum.Font.Gotham
+    resultLabel.TextSize = 14
+    resultLabel.Parent = mainFrame
+    resultLabel.ZIndex = 21
+    
+    -- Переменная для результата
+    local success = false
+    
+    -- Функция проверки
+    local function checkInput()
+        local entered = inputBox.Text:lower():gsub(" ", "")
+        if entered == correctCode then
+            success = true
+            resultLabel.Text = "✅ ДОСТУП РАЗРЕШЕН!"
+            resultLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
+            codeGui:Destroy()
+            return true
+        else
+            resultLabel.Text = "❌ НЕВЕРНЫЙ КОД! Попробуйте снова."
+            resultLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+            inputBox.Text = ""
+            return false
+        end
+    end
+    
+    confirmBtn.MouseButton1Click:Connect(checkInput)
+    inputBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            checkInput()
+        end
+    end)
+    
+    -- Закрытие по Enter
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == Enum.KeyCode.Return and codeGui and codeGui.Parent then
+            checkInput()
+        end
+    end)
+    
+    -- Замораживаем выполнение пока не введут код
+    while codeGui and codeGui.Parent do
+        task.wait(0.1)
+        if success then break end
+    end
+    
+    return success
+end
+
+-- === ПРОВЕРКА КОДА ПРИ ЗАПУСКЕ ===
+local accessGranted = checkCode()
+if not accessGranted then
+    print("❌ Доступ запрещен! Неверный код.")
+    return
+end
+
+print("✅ Доступ разрешен! Загрузка Pulse Visual...")
+
+-- === ОСНОВНАЯ ЛОГИКА ===
+local Features = {
+    Fly = false,
+    Tornado = false,
+    Universal = false,
+    UltraInstinct = false,
+    Invisible = false,
+    Admin = false,
+}
+
+-- === GUI ===
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "PulseVisual"
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
+
+-- === АВАТАРКА ===
+local function getAvatar()
+    local userId = LocalPlayer.UserId
+    return "https://www.roblox.com/headshot-thumbnail/image?userId=" .. userId .. "&width=100&height=100&format=png"
+end
+
+-- === ПОЛЗУНОК ===
+local function createToggle(parent, text, yPos, icon, defaultValue, callback)
+    local active = defaultValue or false
+    
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(0.9, 0, 0, 35) -- Уменьшил высоту контейнера
+    container.Position = UDim2.new(0.05, 0, 0, yPos)
+    container.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+    container.BackgroundTransparency = 0.15
+    container.BorderSizePixel = 1
+    container.BorderColor3 = Color3.fromRGB(0, 150, 255)
+    container.Parent = parent
+    container.ZIndex = 10
+    
+    local containerCorner = Instance.new("UICorner")
+    containerCorner.CornerRadius = UDim.new(0, 10)
+    containerCorner.Parent = container
+    
+    local iconLabel = Instance.new("TextLabel")
+    iconLabel.Size = UDim2.new(0, 25, 1, 0)
+    iconLabel.Position = UDim2.new(0, 5, 0, 0)
+    iconLabel.BackgroundTransparency = 1
+    iconLabel.Text = icon
+    iconLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    iconLabel.Font = Enum.Font.Gotham
+    iconLabel.TextSize = 16
+    iconLabel.TextXAlignment = Enum.TextXAlignment.Center
+    iconLabel.Parent = container
+    iconLabel.ZIndex = 11
+    
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(0.4, 0, 1, 0)
+    textLabel.Position = UDim2.new(0, 35, 0, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = text
+    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    textLabel.Font = Enum.Font.GothamBold
+    textLabel.TextSize = 13
+    textLabel.TextXAlignment = Enum.TextXAlignment.Left
+    textLabel.Parent = container
+    textLabel.ZIndex = 11
+    
+    local toggleBg = Instance.new("Frame")
+    toggleBg.Size = UDim2.new(0, 45, 0, 22)
+    toggleBg.Position = UDim2.new(0.78, 0, 0.5, -11)
+    toggleBg.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+    toggleBg.BorderSizePixel = 0
+    toggleBg.Parent = container
+    toggleBg.ZIndex = 11
+    
+    local toggleCorner = Instance.new("UICorner")
+    toggleCorner.CornerRadius = UDim.new(1, 0)
+    toggleCorner.Parent = toggleBg
+    
+    local toggleKnob = Instance.new("Frame")
+    toggleKnob.Size = UDim2.new(0, 18, 0, 18)
+    toggleKnob.Position = UDim2.new(0, 2, 0.5, -9)
+    toggleKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    toggleKnob.BorderSizePixel = 0
+    toggleKnob.Parent = toggleBg
+    toggleKnob.ZIndex = 12
+    
+    local knobCorner = Instance.new("UICorner")
+    knobCorner.CornerRadius = UDim.new(1, 0)
+    knobCorner.Parent = toggleKnob
+    
+    local function updateToggle(state)
+        active = state
+        if active then
+            toggleBg.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+            toggleKnob.Position = UDim2.new(0, 22, 0.5, -9)
+        else
+            toggleBg.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+            toggleKnob.Position = UDim2.new(0, 2, 0.5, -9)
+        end
+        if callback then callback(active) end
+    end
+    
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Size = UDim2.new(1, 0, 1, 0)
+    toggleBtn.Position = UDim2.new(0, 0, 0, 0)
+    toggleBtn.BackgroundTransparency = 1
+    toggleBtn.Text = ""
+    toggleBtn.Parent = toggleBg
+    toggleBtn.ZIndex = 13
+    
+    toggleBtn.MouseButton1Click:Connect(function()
+        updateToggle(not active)
+    end)
+    
+    local containerBtn = Instance.new("TextButton")
+    containerBtn.Size = UDim2.new(1, 0, 1, 0)
+    containerBtn.Position = UDim2.new(0, 0, 0, 0)
+    containerBtn.BackgroundTransparency = 1
+    containerBtn.Text = ""
+    containerBtn.Parent = container
+    containerBtn.ZIndex = 9
+    
+    containerBtn.MouseButton1Click:Connect(function()
+        updateToggle(not active)
+    end)
+    
+    updateToggle(defaultValue)
+    
+    return {
+        Container = container,
+        Toggle = toggleBg,
+        Knob = toggleKnob,
+        GetState = function() return active end,
+        SetState = updateToggle
+    }
+end
+
+-- === МЕНЮ ===
+local menuFrame, blur
+
+local function toggleMenu()
+    if not menuFrame then return end
+    menuFrame.Visible = not menuFrame.Visible
+    if menuFrame.Visible then
+        blur.Size = 8
+    else
+        blur.Size = 0
+    end
+end
+
+local function createMenu()
+    menuFrame = Instance.new("Frame")
+    menuFrame.Name = "MenuFrame"
+    menuFrame.Size = UDim2.new(0, 320, 0, 360) -- Уменьшил высоту
+    menuFrame.Position = UDim2.new(0.5, -160, 0.5, -180)
+    menuFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 20)
+    menuFrame.BackgroundTransparency = 0.3
+    menuFrame.BorderSizePixel = 1
+    menuFrame.BorderColor3 = Color3.fromRGB(0, 150, 255)
+    menuFrame.ClipsDescendants = true
+    menuFrame.Parent = ScreenGui
+    menuFrame.ZIndex = 10
+    menuFrame.Visible = false
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 20)
+    corner.Parent = menuFrame
+    
+    blur = Instance.new("BlurEffect")
+    blur.Name = "MenuBlur"
+    blur.Parent = game:GetService("Lighting")
+    blur.Size = 0
+    
+    local header = Instance.new("Frame")
+    header.Size = UDim2.new(1, 0, 0, 40) -- Уменьшил высоту шапки
+    header.Position = UDim2.new(0, 0, 0, 0)
+    header.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+    header.BackgroundTransparency = 0.2
+    header.BorderSizePixel = 0
+    header.Parent = menuFrame
+    header.ZIndex = 10
+    
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 1, 0)
+    title.Position = UDim2.new(0, 0, 0, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "💜 PULSE VISUAL"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 16
+    title.Parent = header
+    title.ZIndex = 11
+    
+    local hint = Instance.new("TextLabel")
+    hint.Size = UDim2.new(0.3, 0, 1, 0)
+    hint.Position = UDim2.new(0.7, 0, 0, 0)
+    hint.BackgroundTransparency = 1
+    hint.Text = "[N]"
+    hint.TextColor3 = Color3.fromRGB(150, 150, 200)
+    hint.Font = Enum.Font.Gotham
+    hint.TextSize = 11
+    hint.TextXAlignment = Enum.TextXAlignment.Right
+    hint.Parent = header
+    hint.ZIndex = 11
+    
+    local dragBtn = Instance.new("TextButton")
+    dragBtn.Size = UDim2.new(0, 30, 1, 0)
+    dragBtn.Position = UDim2.new(0, 5, 0, 0)
+    dragBtn.BackgroundTransparency = 1
+    dragBtn.Text = "≡"
+    dragBtn.TextColor3 = Color3.fromRGB(200, 200, 255)
+    dragBtn.Font = Enum.Font.GothamBold
+    dragBtn.TextSize = 16
+    dragBtn.Parent = header
+    dragBtn.ZIndex = 12
+    
+    local yStart = 48 -- Сдвинул вверх
+    local spacing = 42 -- Уменьшил расстояние между пунктами
+    
+    local flyToggle = createToggle(menuFrame, "Fly", yStart, "✈️", false, function(state)
+        Features.Fly = state
+        if state then
+            loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Vehicle-Fly-Gui-241743"))()
+        end
+    end)
+    
+    local tornadoToggle = createToggle(menuFrame, "Tornado", yStart + spacing, "🌪️", false, function(state)
+        Features.Tornado = state
+        if state then
+            loadstring(game:HttpGet("https://rawscripts.net/raw/Natural-Disaster-Survival-Super-ring-V4-24296"))()
+        end
+    end)
+    
+    local universalToggle = createToggle(menuFrame, "Universal All Game", yStart + spacing * 2, "🌐", false, function(state)
+        Features.Universal = state
+        if state then
+            loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Universal-aimbot-esp-hitbox-240872"))()
+        end
+    end)
+    
+    local ultraToggle = createToggle(menuFrame, "Ultra Instinct", yStart + spacing * 3, "💫", false, function(state)
+        Features.UltraInstinct = state
+        if state then
+            loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Ultra-instinct-64550"))()
+        end
+    end)
+    
+    local invisibleToggle = createToggle(menuFrame, "Invisible", yStart + spacing * 4, "👻", false, function(state)
+        Features.Invisible = state
+        if state then
+            loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fe-Invisible-56490"))()
+        end
+    end)
+    
+    local adminToggle = createToggle(menuFrame, "Admin Panel", yStart + spacing * 5, "👽", false, function(state)
+        Features.Admin = state
+        if state then
+            loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-infinity-yield-admin-script-21792"))()
+        end
+    end)
+    
+    -- Аватарка
+    local avatarContainer = Instance.new("Frame")
+    avatarContainer.Size = UDim2.new(0, 25, 0, 25)
+    avatarContainer.Position = UDim2.new(0, 10, 1, -35)
+    avatarContainer.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+    avatarContainer.BackgroundTransparency = 0
+    avatarContainer.BorderSizePixel = 0
+    avatarContainer.Parent = menuFrame
+    avatarContainer.ZIndex = 11
+    
+    local avatarCorner = Instance.new("UICorner")
+    avatarCorner.CornerRadius = UDim.new(1, 0)
+    avatarCorner.Parent = avatarContainer
+    
+    local avatarImage = Instance.new("ImageLabel")
+    avatarImage.Size = UDim2.new(1, 0, 1, 0)
+    avatarImage.Position = UDim2.new(0, 0, 0, 0)
+    avatarImage.BackgroundTransparency = 1
+    avatarImage.Image = getAvatar()
+    avatarImage.Parent = avatarContainer
+    avatarImage.ZIndex = 12
+    
+    local avatarImageCorner = Instance.new("UICorner")
+    avatarImageCorner.CornerRadius = UDim.new(1, 0)
+    avatarImageCorner.Parent = avatarImage
+    
+    local userName = Instance.new("TextLabel")
+    userName.Size = UDim2.new(0, 120, 0, 14)
+    userName.Position = UDim2.new(0, 40, 1, -32)
+    userName.BackgroundTransparency = 1
+    userName.Text = LocalPlayer.Name
+    userName.TextColor3 = Color3.fromRGB(255, 255, 255)
+    userName.Font = Enum.Font.GothamBold
+    userName.TextSize = 11
+    userName.TextXAlignment = Enum.TextXAlignment.Left
+    userName.Parent = menuFrame
+    userName.ZIndex = 11
+    
+    local status = Instance.new("TextLabel")
+    status.Size = UDim2.new(0, 80, 0, 12)
+    status.Position = UDim2.new(0, 40, 1, -19)
+    status.BackgroundTransparency = 1
+    status.Text = "● Online"
+    status.TextColor3 = Color3.fromRGB(0, 255, 150)
+    status.Font = Enum.Font.Gotham
+    status.TextSize = 9
+    status.TextXAlignment = Enum.TextXAlignment.Left
+    status.Parent = menuFrame
+    status.ZIndex = 11
+    
+    -- Перетаскивание
+    local dragging = false
+    local dragStart, startPos
+    local currentTouch = nil
+    
+    local function startDragging(input)
+        dragging = true
+        dragStart = input.Position
+        startPos = menuFrame.Position
+        if input.UserInputType == Enum.UserInputType.Touch then
+            currentTouch = input
+        end
+    end
+    
+    local function stopDragging()
+        dragging = false
+        currentTouch = nil
+    end
+    
+    header.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            startDragging(input)
+        end
+    end)
+    
+    header.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            stopDragging()
+        end
+    end)
+    
+    dragBtn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            startDragging(input)
+        end
+    end)
+    
+    dragBtn.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            stopDragging()
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if not dragging then return end
+        
+        local delta
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            delta = input.Position - dragStart
+        elseif input.UserInputType == Enum.UserInputType.Touch and currentTouch then
+            delta = input.Position - dragStart
+        else
+            return
+        end
+        
+        menuFrame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end)
+end
+
+-- === ОТКРЫТИЕ/ЗАКРЫТИЕ ПО N ===
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.N then
+        toggleMenu()
+    end
+end)
+
+-- === ЗАПУСК ===
+createMenu()
+
+print("💜 Pulse Visual загружен! Код принят!")
+print("Нажми N чтобы открыть/закрыть меню")
+print("Доступные функции: Fly, Tornado, Universal All Game, Ultra Instinct, Invisible, Admin Panel")
