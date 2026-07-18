@@ -1,26 +1,35 @@
--- PULSE VISUAL - ПРОЗРАЧНЫЙ ФОН ВОЗЛЕ ФУНКЦИЙ
+-- PULSE VISUAL - ФИНАЛЬНАЯ ВЕРСИЯ (БЕЗ ТЕМ, С НАСТРОЙКОЙ БИНДА)
 local player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local LocalPlayer = Players.LocalPlayer
 
 print("💜 Загрузка Pulse Visual...")
 
--- СОЗДАЕМ GUI
+-- === НАСТРОЙКИ ===
+local Settings = {
+    OpenKey = Enum.KeyCode.N, -- клавиша по умолчанию
+}
+
+-- === GUI ===
 local gui = Instance.new("ScreenGui")
 gui.Name = "PulseMain"
 gui.Parent = player:WaitForChild("PlayerGui")
 gui.ResetOnSpawn = false
 
--- ОСНОВНАЯ РАМКА (ПРОЗРАЧНЫЙ ФИОЛЕТОВЫЙ)
+-- ОСНОВНАЯ РАМКА
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 320, 0, 420)
 frame.Position = UDim2.new(0.5, -160, 0.5, -210)
 frame.BackgroundColor3 = Color3.fromRGB(150, 50, 255)
-frame.BackgroundTransparency = 0.3 -- ПРОЗРАЧНЫЙ
+frame.BackgroundTransparency = 0.25
 frame.BorderSizePixel = 2
 frame.BorderColor3 = Color3.fromRGB(200, 100, 255)
 frame.Parent = gui
-frame.Visible = false
+frame.Visible = true
 frame.Active = true
 frame.ClipsDescendants = true
 
@@ -28,11 +37,10 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 16)
 corner.Parent = frame
 
--- РАЗМЫТИЕ
 local blur = Instance.new("BlurEffect")
 blur.Name = "MenuBlur"
-blur.Parent = game:GetService("Lighting")
-blur.Size = 0
+blur.Parent = Lighting
+blur.Size = 8
 
 -- ЗАГОЛОВОК
 local title = Instance.new("TextLabel")
@@ -44,7 +52,7 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 title.Parent = frame
 
--- ПОДСКАЗКА
+-- ПОДСКАЗКА (будет обновляться)
 local hint = Instance.new("TextLabel")
 hint.Size = UDim2.new(0, 100, 0, 20)
 hint.Position = UDim2.new(0.7, 0, 0.02, 0)
@@ -55,6 +63,13 @@ hint.Font = Enum.Font.Gotham
 hint.TextSize = 12
 hint.Parent = frame
 
+-- Обновление подсказки
+local function updateHint()
+    local keyName = Settings.OpenKey.Name
+    hint.Text = "[" .. keyName .. "]"
+end
+updateHint()
+
 -- === ВКЛАДКИ ===
 local tabContainer = Instance.new("Frame")
 tabContainer.Size = UDim2.new(1, 0, 0, 30)
@@ -63,9 +78,8 @@ tabContainer.BackgroundTransparency = 0.5
 tabContainer.BorderSizePixel = 0
 tabContainer.Parent = frame
 
--- Кнопка Universal
 local tabUniversal = Instance.new("TextButton")
-tabUniversal.Size = UDim2.new(0.45, 0, 1, 0)
+tabUniversal.Size = UDim2.new(0.3, 0, 1, 0)
 tabUniversal.Position = UDim2.new(0.025, 0, 0, 0)
 tabUniversal.BackgroundColor3 = Color3.fromRGB(200, 100, 255)
 tabUniversal.BackgroundTransparency = 0.2
@@ -74,17 +88,16 @@ tabUniversal.BorderColor3 = Color3.fromRGB(200, 100, 255)
 tabUniversal.Text = "🌐 Universal"
 tabUniversal.TextColor3 = Color3.fromRGB(255, 255, 255)
 tabUniversal.Font = Enum.Font.GothamBold
-tabUniversal.TextSize = 13
+tabUniversal.TextSize = 12
 tabUniversal.Parent = tabContainer
 
 local tabCorner1 = Instance.new("UICorner")
 tabCorner1.CornerRadius = UDim.new(0, 12)
 tabCorner1.Parent = tabUniversal
 
--- Кнопка TSB
 local tabTSB = Instance.new("TextButton")
-tabTSB.Size = UDim2.new(0.45, 0, 1, 0)
-tabTSB.Position = UDim2.new(0.525, 0, 0, 0)
+tabTSB.Size = UDim2.new(0.3, 0, 1, 0)
+tabTSB.Position = UDim2.new(0.35, 0, 0, 0)
 tabTSB.BackgroundColor3 = Color3.fromRGB(150, 50, 255)
 tabTSB.BackgroundTransparency = 0.3
 tabTSB.BorderSizePixel = 1
@@ -92,18 +105,35 @@ tabTSB.BorderColor3 = Color3.fromRGB(150, 50, 255)
 tabTSB.Text = "⚔️ TSB"
 tabTSB.TextColor3 = Color3.fromRGB(200, 180, 255)
 tabTSB.Font = Enum.Font.GothamBold
-tabTSB.TextSize = 13
+tabTSB.TextSize = 12
 tabTSB.Parent = tabContainer
 
 local tabCorner2 = Instance.new("UICorner")
 tabCorner2.CornerRadius = UDim.new(0, 12)
 tabCorner2.Parent = tabTSB
 
--- === КОНТЕЙНЕРЫ С ФУНКЦИЯМИ (ПРОЗРАЧНЫЙ ФОН) ===
+local tabSettings = Instance.new("TextButton")
+tabSettings.Size = UDim2.new(0.3, 0, 1, 0)
+tabSettings.Position = UDim2.new(0.675, 0, 0, 0)
+tabSettings.BackgroundColor3 = Color3.fromRGB(150, 50, 255)
+tabSettings.BackgroundTransparency = 0.3
+tabSettings.BorderSizePixel = 1
+tabSettings.BorderColor3 = Color3.fromRGB(150, 50, 255)
+tabSettings.Text = "⚙️ Settings"
+tabSettings.TextColor3 = Color3.fromRGB(200, 180, 255)
+tabSettings.Font = Enum.Font.GothamBold
+tabSettings.TextSize = 12
+tabSettings.Parent = tabContainer
+
+local tabCorner3 = Instance.new("UICorner")
+tabCorner3.CornerRadius = UDim.new(0, 12)
+tabCorner3.Parent = tabSettings
+
+-- === КОНТЕЙНЕРЫ ===
 local universalContent = Instance.new("ScrollingFrame")
 universalContent.Size = UDim2.new(1, 0, 1, -75)
 universalContent.Position = UDim2.new(0, 0, 0, 72)
-universalContent.BackgroundTransparency = 1 -- ПОЛНОСТЬЮ ПРОЗРАЧНЫЙ
+universalContent.BackgroundTransparency = 1
 universalContent.BorderSizePixel = 0
 universalContent.Parent = frame
 universalContent.CanvasSize = UDim2.new(0, 0, 0, 400)
@@ -114,149 +144,321 @@ universalContent.Visible = true
 local tsbContent = Instance.new("ScrollingFrame")
 tsbContent.Size = UDim2.new(1, 0, 1, -75)
 tsbContent.Position = UDim2.new(0, 0, 0, 72)
-tsbContent.BackgroundTransparency = 1 -- ПОЛНОСТЬЮ ПРОЗРАЧНЫЙ
+tsbContent.BackgroundTransparency = 1
 tsbContent.BorderSizePixel = 0
 tsbContent.Parent = frame
-tsbContent.CanvasSize = UDim2.new(0, 0, 0, 200)
+tsbContent.CanvasSize = UDim2.new(0, 0, 0, 400)
 tsbContent.ScrollBarThickness = 6
 tsbContent.ScrollBarImageColor3 = Color3.fromRGB(200, 100, 255)
 tsbContent.Visible = false
 
-local tsbPlaceholder = Instance.new("TextLabel")
-tsbPlaceholder.Size = UDim2.new(1, 0, 0, 50)
-tsbPlaceholder.Position = UDim2.new(0, 0, 0.2, 0)
-tsbPlaceholder.BackgroundTransparency = 1
-tsbPlaceholder.Text = "⚔️ TSB ФУНКЦИИ\nВ РАЗРАБОТКЕ..."
-tsbPlaceholder.TextColor3 = Color3.fromRGB(200, 180, 255)
-tsbPlaceholder.Font = Enum.Font.GothamBold
-tsbPlaceholder.TextSize = 18
-tsbPlaceholder.TextScaled = true
-tsbPlaceholder.TextXAlignment = Enum.TextXAlignment.Center
-tsbPlaceholder.Parent = tsbContent
+local settingsContent = Instance.new("ScrollingFrame")
+settingsContent.Size = UDim2.new(1, 0, 1, -75)
+settingsContent.Position = UDim2.new(0, 0, 0, 72)
+settingsContent.BackgroundTransparency = 1
+settingsContent.BorderSizePixel = 0
+settingsContent.Parent = frame
+settingsContent.CanvasSize = UDim2.new(0, 0, 0, 150)
+settingsContent.ScrollBarThickness = 6
+settingsContent.ScrollBarImageColor3 = Color3.fromRGB(200, 100, 255)
+settingsContent.Visible = false
 
--- === АНИМАЦИЯ ПОЯВЛЕНИЯ ===
-local function animateMenu(show)
-    if show then
-        frame.Visible = true
-        blur.Size = 8
-        frame.Size = UDim2.new(0, 280, 0, 370)
-        frame.BackgroundTransparency = 0.8
-        frame.Position = UDim2.new(0.5, -140, 0.5, -185)
-        
-        local tween1 = TweenService:Create(frame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, 320, 0, 420),
-            BackgroundTransparency = 0.3,
-            Position = UDim2.new(0.5, -160, 0.5, -210)
-        })
-        tween1:Play()
+-- === ESP ===
+local ESP = {
+    Enabled = false,
+    ColorMode = "Rainbow",
+    Data = {},
+    ShowName = true,
+    ShowKills = true,
+    ShowHighlight = true,
+}
+
+local function GetESPColor(time)
+    local mode = ESP.ColorMode
+    if mode == "Rainbow" then
+        local hue = (time * 0.2) % 1
+        return Color3.fromHSV(hue, 1, 1)
+    elseif mode == "Galaxy" then
+        local r = 0.5 + 0.5 * math.sin(time * 0.5)
+        local g = 0.3 + 0.4 * math.sin(time * 0.7 + 1)
+        local b = 0.8 + 0.2 * math.sin(time * 0.9 + 2)
+        return Color3.new(r, g, b)
+    elseif mode == "Neon" then
+        local hue = (time * 0.15) % 1
+        return Color3.fromHSV(hue, 1, 0.8)
+    elseif mode == "Acid" then
+        local r = 0.8 + 0.2 * math.sin(time * 0.8)
+        local g = 0.9 + 0.1 * math.sin(time * 0.6 + 1)
+        local b = 0.2 + 0.3 * math.sin(time * 0.5 + 2)
+        return Color3.new(r, g, b)
+    elseif mode == "WhitePulse" then
+        local pulse = (math.sin(time * 2) + 1) / 2
+        return Color3.new(0.5 + pulse * 0.5, 0.5 + pulse * 0.5, 0.5 + pulse * 0.5)
+    elseif mode == "BluePulse" then
+        local pulse = (math.sin(time * 2) + 1) / 2
+        return Color3.new(0.3 + pulse * 0.4, 0.6 + pulse * 0.3, 0.9 + pulse * 0.1)
     else
-        blur.Size = 0
-        local tween1 = TweenService:Create(frame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            Size = UDim2.new(0, 280, 0, 370),
-            BackgroundTransparency = 0.8,
-            Position = UDim2.new(0.5, -140, 0.5, -185)
-        })
-        tween1:Play()
-        task.wait(0.25)
-        frame.Visible = false
+        return Color3.fromRGB(255, 255, 255)
     end
 end
 
--- === АНИМАЦИЯ ПРИ ВКЛЮЧЕНИИ ФУНКЦИИ ===
-local function animateButton(btn, active)
-    if active then
-        local tween = TweenService:Create(btn, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            BackgroundColor3 = Color3.fromRGB(0, 100, 50),
-            BorderColor3 = Color3.fromRGB(0, 255, 100)
-        })
-        tween:Play()
-    else
-        local tween = TweenService:Create(btn, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            BackgroundColor3 = Color3.fromRGB(40, 20, 60),
-            BorderColor3 = Color3.fromRGB(200, 100, 255)
-        })
-        tween:Play()
+local function GetTotalKills(p)
+    if not ESP.ShowKills then return "" end
+    local ls = p:FindFirstChild("leaderstats")
+    if ls then
+        local kills = ls:FindFirstChild("TotalKills") or ls:FindFirstChild("Total Kills") or ls:FindFirstChild("Kills") or ls:FindFirstChild("Points") or ls:FindFirstChild("Score")
+        if kills then
+            local val = tonumber(kills.Value)
+            if val and val > 0 then return " 💀 " .. tostring(val) end
+        end
+    end
+    return ""
+end
+
+local function GetDisplayName(p)
+    if not ESP.ShowName then return "" end
+    return (p.DisplayName and p.DisplayName ~= "") and p.DisplayName or p.Name
+end
+
+local function CreateESPForPlayer(p)
+    if p == LocalPlayer then return end
+    if ESP.Data[p] then return end
+
+    local char = p.Character
+    if not char then return end
+
+    local highlight = Instance.new("Highlight")
+    highlight.Parent = char
+    highlight.FillColor = Color3.fromRGB(255, 0, 255)
+    highlight.FillTransparency = 0.7
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    highlight.OutlineTransparency = 0.2
+    highlight.Enabled = false
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Parent = char
+    local head = char:FindFirstChild("Head") or char:FindFirstChild("Torso") or char:FindFirstChild("HumanoidRootPart")
+    if not head then
+        local parts = char:GetChildren()
+        for _, part in pairs(parts) do
+            if part:IsA("BasePart") then
+                head = part
+                break
+            end
+        end
+    end
+    billboard.Adornee = head
+    billboard.Size = UDim2.new(0, 400, 0, 30)
+    billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Enabled = false
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = GetDisplayName(p) .. GetTotalKills(p)
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextSize = 18
+    label.Font = Enum.Font.GothamBold
+    label.TextStrokeTransparency = 0.2
+    label.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    label.Parent = billboard
+
+    ESP.Data[p] = {highlight = highlight, billboard = billboard, label = label}
+    return true
+end
+
+local function UpdateESPState()
+    for p, data in pairs(ESP.Data) do
+        if ESP.Enabled then
+            data.highlight.Enabled = ESP.ShowHighlight
+            data.billboard.Enabled = true
+        else
+            data.highlight.Enabled = false
+            data.billboard.Enabled = false
+        end
     end
 end
 
--- === АНИМАЦИЯ ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК ===
-local function switchTab(showUniversal)
-    if showUniversal then
-        universalContent.Visible = true
-        tsbContent.Visible = false
-        tabUniversal.BackgroundColor3 = Color3.fromRGB(200, 100, 255)
-        tabUniversal.BackgroundTransparency = 0.2
-        tabUniversal.BorderColor3 = Color3.fromRGB(200, 100, 255)
-        tabUniversal.TextColor3 = Color3.fromRGB(255, 255, 255)
-        tabTSB.BackgroundColor3 = Color3.fromRGB(150, 50, 255)
-        tabTSB.BackgroundTransparency = 0.3
-        tabTSB.BorderColor3 = Color3.fromRGB(150, 50, 255)
-        tabTSB.TextColor3 = Color3.fromRGB(200, 180, 255)
-    else
-        universalContent.Visible = false
-        tsbContent.Visible = true
-        tabTSB.BackgroundColor3 = Color3.fromRGB(200, 100, 255)
-        tabTSB.BackgroundTransparency = 0.2
-        tabTSB.BorderColor3 = Color3.fromRGB(200, 100, 255)
-        tabTSB.TextColor3 = Color3.fromRGB(255, 255, 255)
-        tabUniversal.BackgroundColor3 = Color3.fromRGB(150, 50, 255)
-        tabUniversal.BackgroundTransparency = 0.3
-        tabUniversal.BorderColor3 = Color3.fromRGB(150, 50, 255)
-        tabUniversal.TextColor3 = Color3.fromRGB(200, 180, 255)
+local function UpdateESPColors()
+    local time = tick()
+    local color = GetESPColor(time)
+    for p, data in pairs(ESP.Data) do
+        if data.highlight and data.highlight.Enabled then
+            data.highlight.FillColor = color
+            data.highlight.OutlineColor = color
+        end
+        if data.label then
+            data.label.TextColor3 = color
+        end
     end
 end
 
--- === ФУНКЦИЯ КНОПКИ (ПРОЗРАЧНЫЙ ФОН) ===
-local function createBtn(text, y, icon, url)
+local function UpdateESPInfo()
+    for p, data in pairs(ESP.Data) do
+        if data.label and p.Parent then
+            data.label.Text = GetDisplayName(p) .. GetTotalKills(p)
+        end
+    end
+end
+
+local function RefreshESP()
+    for p, data in pairs(ESP.Data) do
+        if not p.Parent or not p.Character then
+            data.highlight:Destroy()
+            data.billboard:Destroy()
+            ESP.Data[p] = nil
+        end
+    end
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character and not ESP.Data[p] then
+            CreateESPForPlayer(p)
+        end
+    end
+    UpdateESPState()
+end
+
+Players.PlayerAdded:Connect(function(p)
+    if p == LocalPlayer then return end
+    p.CharacterAdded:Connect(function()
+        task.wait(0.5)
+        if ESP.Data[p] then
+            ESP.Data[p].highlight:Destroy()
+            ESP.Data[p].billboard:Destroy()
+            ESP.Data[p] = nil
+        end
+        CreateESPForPlayer(p)
+        UpdateESPState()
+        UpdateESPColors()
+    end)
+    task.wait(0.5)
+    CreateESPForPlayer(p)
+    UpdateESPState()
+    UpdateESPColors()
+end)
+
+Players.PlayerRemoving:Connect(function(p)
+    if ESP.Data[p] then
+        ESP.Data[p].highlight:Destroy()
+        ESP.Data[p].billboard:Destroy()
+        ESP.Data[p] = nil
+    end
+end)
+
+for _, p in pairs(Players:GetPlayers()) do
+    if p ~= LocalPlayer then
+        p.CharacterAdded:Connect(function()
+            task.wait(0.5)
+            if ESP.Data[p] then
+                ESP.Data[p].highlight:Destroy()
+                ESP.Data[p].billboard:Destroy()
+                ESP.Data[p] = nil
+            end
+            CreateESPForPlayer(p)
+            UpdateESPState()
+            UpdateESPColors()
+        end)
+    end
+end
+
+RunService.Heartbeat:Connect(function()
+    if ESP.Enabled then
+        UpdateESPColors()
+        if tick() % 0.5 < 0.05 then
+            UpdateESPInfo()
+        end
+    end
+end)
+
+-- === СОЗДАНИЕ КОНТЕНТА UNIVERSAL ===
+local universalButtons = {}
+local function createStyledButton(text, y, icon, url)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.9, 0, 0, 32)
+    btn.Size = UDim2.new(0.9, 0, 0, 34)
     btn.Position = UDim2.new(0.05, 0, 0, y)
-    btn.BackgroundColor3 = Color3.fromRGB(40, 20, 60)
-    btn.BackgroundTransparency = 0.4 -- ПРОЗРАЧНЫЙ ФОН
+    btn.BackgroundColor3 = Color3.fromRGB(140, 80, 220)
+    btn.BackgroundTransparency = 0.05
     btn.BorderSizePixel = 1
-    btn.BorderColor3 = Color3.fromRGB(200, 100, 255)
-    btn.Text = "○ " .. icon .. " " .. text
+    btn.BorderColor3 = Color3.fromRGB(220, 180, 255)
+    btn.Text = "  " .. icon .. "  " .. text
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 13
+    btn.TextXAlignment = Enum.TextXAlignment.Left
     btn.Parent = universalContent
     
+    local grad = Instance.new("UIGradient")
+    grad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(160, 100, 240)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 140, 255))
+    })
+    grad.Rotation = 45
+    grad.Parent = btn
+    
     local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 8)
+    btnCorner.CornerRadius = UDim.new(0, 10)
     btnCorner.Parent = btn
     
+    local shadow = Instance.new("UIStroke")
+    shadow.Color = Color3.fromRGB(220, 180, 255)
+    shadow.Thickness = 0
+    shadow.Transparency = 0.5
+    shadow.Parent = btn
+    
+    table.insert(universalButtons, btn)
+    
+    local enterTween, leaveTween
     btn.MouseEnter:Connect(function()
-        local tween = TweenService:Create(btn, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            BackgroundTransparency = 0.2,
-            Size = UDim2.new(0.92, 0, 0, 34)
+        if enterTween then enterTween:Cancel() end
+        enterTween = TweenService:Create(btn, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            BackgroundTransparency = 0,
+            Size = UDim2.new(0.92, 0, 0, 36),
+            BorderSizePixel = 2
         })
-        tween:Play()
+        enterTween:Play()
+        shadow.Thickness = 2
+        shadow.Transparency = 0.2
     end)
     
     btn.MouseLeave:Connect(function()
-        local tween = TweenService:Create(btn, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            BackgroundTransparency = 0.4,
-            Size = UDim2.new(0.9, 0, 0, 32)
+        if leaveTween then leaveTween:Cancel() end
+        leaveTween = TweenService:Create(btn, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            BackgroundTransparency = 0.05,
+            Size = UDim2.new(0.9, 0, 0, 34),
+            BorderSizePixel = 1
         })
-        tween:Play()
+        leaveTween:Play()
+        shadow.Thickness = 0
+        shadow.Transparency = 0.5
     end)
     
     local active = false
     btn.MouseButton1Click:Connect(function()
         active = not active
-        animateButton(btn, active)
-        btn.Text = (active and "● " or "○ ") .. icon .. " " .. text
-        
-        if active and url then
-            print("🔄 Загрузка " .. text)
-            pcall(function()
-                loadstring(game:HttpGet(url))()
-            end)
+        if active then
+            local tween = TweenService:Create(btn, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundColor3 = Color3.fromRGB(0, 180, 100),
+                BorderColor3 = Color3.fromRGB(0, 255, 150)
+            })
+            tween:Play()
+            btn.Text = "● " .. icon .. " " .. text
+            if url then
+                print("🔄 Загрузка " .. text)
+                pcall(function()
+                    loadstring(game:HttpGet(url))()
+                end)
+            end
+        else
+            local tween = TweenService:Create(btn, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                BackgroundColor3 = Color3.fromRGB(140, 80, 220),
+                BorderColor3 = Color3.fromRGB(220, 180, 255)
+            })
+            tween:Play()
+            btn.Text = "  " .. icon .. "  " .. text
         end
     end)
 end
 
--- ВСЕ ФУНКЦИИ
 local funcs = {
     "Fly (Vencible)|✈️|https://rawscripts.net/raw/Universal-Script-Vencible-fly-gui-R15-210034",
     "Tornado|🌪️|https://rawscripts.net/raw/Natural-Disaster-Survival-Super-ring-V4-24296",
@@ -275,20 +477,392 @@ for i, data in ipairs(funcs) do
     for part in data:gmatch("[^|]+") do
         table.insert(parts, part)
     end
-    local y = 5 + (i-1) * 38
-    createBtn(parts[1], y, parts[2], parts[3])
+    local y = 5 + (i-1) * 42
+    createStyledButton(parts[1], y, parts[2], parts[3])
 end
 
-universalContent.CanvasSize = UDim2.new(0, 0, 0, #funcs * 38 + 20)
+universalContent.CanvasSize = UDim2.new(0, 0, 0, #funcs * 42 + 20)
+
+-- === КОНТЕНТ TSB (ESP) ===
+local espContainer = nil
+local espToggleBtn = nil
+local espStatusLabel = nil
+local espColorButtons = {}
+local espVisible = true
+
+local function CreateTSBContent()
+    for _, child in ipairs(tsbContent:GetChildren()) do
+        child:Destroy()
+    end
+    
+    local espHeader = Instance.new("Frame")
+    espHeader.Size = UDim2.new(0.9, 0, 0, 30)
+    espHeader.Position = UDim2.new(0.05, 0, 0, 0)
+    espHeader.BackgroundColor3 = Color3.fromRGB(200, 100, 255)
+    espHeader.BackgroundTransparency = 0.2
+    espHeader.BorderSizePixel = 1
+    espHeader.BorderColor3 = Color3.fromRGB(200, 100, 255)
+    espHeader.Parent = tsbContent
+    
+    local espHeaderCorner = Instance.new("UICorner")
+    espHeaderCorner.CornerRadius = UDim.new(0, 8)
+    espHeaderCorner.Parent = espHeader
+    
+    local espTitle = Instance.new("TextLabel")
+    espTitle.Size = UDim2.new(0.7, 0, 1, 0)
+    espTitle.Position = UDim2.new(0.05, 0, 0, 0)
+    espTitle.BackgroundTransparency = 1
+    espTitle.Text = "👁️ ESP"
+    espTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    espTitle.Font = Enum.Font.GothamBold
+    espTitle.TextSize = 14
+    espTitle.TextXAlignment = Enum.TextXAlignment.Left
+    espTitle.Parent = espHeader
+    
+    local toggleVisibilityBtn = Instance.new("TextButton")
+    toggleVisibilityBtn.Size = UDim2.new(0, 30, 0, 26)
+    toggleVisibilityBtn.Position = UDim2.new(0.85, 0, 0.5, -13)
+    toggleVisibilityBtn.BackgroundColor3 = Color3.fromRGB(200, 100, 255)
+    toggleVisibilityBtn.BackgroundTransparency = 0.1
+    toggleVisibilityBtn.BorderSizePixel = 1
+    toggleVisibilityBtn.BorderColor3 = Color3.fromRGB(200, 100, 255)
+    toggleVisibilityBtn.Text = "▲"
+    toggleVisibilityBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggleVisibilityBtn.Font = Enum.Font.GothamBold
+    toggleVisibilityBtn.TextSize = 14
+    toggleVisibilityBtn.Parent = espHeader
+    
+    local toggleVisCorner = Instance.new("UICorner")
+    toggleVisCorner.CornerRadius = UDim.new(0, 6)
+    toggleVisCorner.Parent = toggleVisibilityBtn
+    
+    espContainer = Instance.new("Frame")
+    espContainer.Size = UDim2.new(1, 0, 0, 400)
+    espContainer.Position = UDim2.new(0, 0, 0, 35)
+    espContainer.BackgroundTransparency = 1
+    espContainer.BorderSizePixel = 0
+    espContainer.Parent = tsbContent
+    espContainer.ClipsDescendants = true
+    
+    local yOffset = 0
+    
+    espToggleBtn = Instance.new("TextButton")
+    espToggleBtn.Size = UDim2.new(0.9, 0, 0, 36)
+    espToggleBtn.Position = UDim2.new(0.05, 0, 0, yOffset)
+    espToggleBtn.BackgroundColor3 = Color3.fromRGB(140, 80, 220)
+    espToggleBtn.BackgroundTransparency = 0.05
+    espToggleBtn.BorderSizePixel = 1
+    espToggleBtn.BorderColor3 = Color3.fromRGB(220, 180, 255)
+    espToggleBtn.Text = "🔮 ВКЛЮЧИТЬ ESP"
+    espToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    espToggleBtn.Font = Enum.Font.GothamBold
+    espToggleBtn.TextSize = 14
+    espToggleBtn.Parent = espContainer
+    
+    local gradToggle = Instance.new("UIGradient")
+    gradToggle.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(160, 100, 240)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 140, 255))
+    })
+    gradToggle.Rotation = 45
+    gradToggle.Parent = espToggleBtn
+    
+    local espToggleCorner = Instance.new("UICorner")
+    espToggleCorner.CornerRadius = UDim.new(0, 10)
+    espToggleCorner.Parent = espToggleBtn
+    
+    yOffset = yOffset + 46
+    
+    espStatusLabel = Instance.new("TextLabel")
+    espStatusLabel.Size = UDim2.new(1, 0, 0, 25)
+    espStatusLabel.Position = UDim2.new(0, 0, 0, yOffset)
+    espStatusLabel.BackgroundTransparency = 1
+    espStatusLabel.Text = "❌ ESP ОТКЛЮЧЕН"
+    espStatusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    espStatusLabel.Font = Enum.Font.GothamBold
+    espStatusLabel.TextSize = 14
+    espStatusLabel.Parent = espContainer
+    
+    yOffset = yOffset + 30
+    
+    local settingsLabel = Instance.new("TextLabel")
+    settingsLabel.Size = UDim2.new(1, 0, 0, 25)
+    settingsLabel.Position = UDim2.new(0, 0, 0, yOffset)
+    settingsLabel.BackgroundTransparency = 1
+    settingsLabel.Text = "⚙️ Настройки отображения:"
+    settingsLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
+    settingsLabel.Font = Enum.Font.GothamBold
+    settingsLabel.TextSize = 14
+    settingsLabel.Parent = espContainer
+    
+    yOffset = yOffset + 28
+    
+    local function createCheckbox(text, y, default, callback)
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(0.8, 0, 0, 25)
+        btn.Position = UDim2.new(0.1, 0, 0, y)
+        btn.BackgroundColor3 = Color3.fromRGB(120, 70, 190)
+        btn.BackgroundTransparency = 0.1
+        btn.BorderSizePixel = 1
+        btn.BorderColor3 = Color3.fromRGB(220, 180, 255)
+        btn.Text = (default and "✅ " or "❌ ") .. text
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.Font = Enum.Font.Gotham
+        btn.TextSize = 13
+        btn.TextXAlignment = Enum.TextXAlignment.Left
+        btn.Parent = espContainer
+        
+        local btnCorner = Instance.new("UICorner")
+        btnCorner.CornerRadius = UDim.new(0, 6)
+        btnCorner.Parent = btn
+        
+        local state = default
+        btn.MouseButton1Click:Connect(function()
+            state = not state
+            btn.Text = (state and "✅ " or "❌ ") .. text
+            callback(state)
+        end)
+        return btn
+    end
+    
+    local nameCheck = createCheckbox("Показывать ник", yOffset, true, function(s)
+        ESP.ShowName = s
+        UpdateESPInfo()
+        UpdateESPState()
+    end)
+    yOffset = yOffset + 30
+    
+    local killsCheck = createCheckbox("Показывать килы", yOffset, true, function(s)
+        ESP.ShowKills = s
+        UpdateESPInfo()
+    end)
+    yOffset = yOffset + 30
+    
+    local highlightCheck = createCheckbox("Подсветка (Highlight)", yOffset, true, function(s)
+        ESP.ShowHighlight = s
+        UpdateESPState()
+    end)
+    yOffset = yOffset + 30
+    
+    local colorLabel = Instance.new("TextLabel")
+    colorLabel.Size = UDim2.new(1, 0, 0, 25)
+    colorLabel.Position = UDim2.new(0, 0, 0, yOffset)
+    colorLabel.BackgroundTransparency = 1
+    colorLabel.Text = "🎨 Цвета ESP:"
+    colorLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
+    colorLabel.Font = Enum.Font.GothamBold
+    colorLabel.TextSize = 14
+    colorLabel.Parent = espContainer
+    
+    yOffset = yOffset + 30
+    
+    local colorModes = {
+        {"Радуга", "Rainbow"},
+        {"Галактика", "Galaxy"},
+        {"Неон", "Neon"},
+        {"Кислотный", "Acid"},
+        {"Белый пульс", "WhitePulse"},
+        {"Синий пульс", "BluePulse"},
+    }
+    
+    for i, modeData in ipairs(colorModes) do
+        local btn = Instance.new("TextButton")
+        local col = (i-1) % 3
+        local row = math.floor((i-1) / 3)
+        local xPos = 0.05 + col * 0.32
+        local yPos = yOffset + row * 28
+        btn.Size = UDim2.new(0.30, 0, 0, 24)
+        btn.Position = UDim2.new(xPos, 0, 0, yPos)
+        btn.BackgroundColor3 = Color3.fromRGB(120, 70, 190)
+        btn.Text = modeData[1]
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.TextSize = 11
+        btn.Font = Enum.Font.Gotham
+        btn.Parent = espContainer
+        
+        local grad = Instance.new("UIGradient")
+        grad.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(140, 90, 220)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 140, 255))
+        })
+        grad.Rotation = 45
+        grad.Parent = btn
+        
+        local btnCorner = Instance.new("UICorner")
+        btnCorner.CornerRadius = UDim.new(0, 6)
+        btnCorner.Parent = btn
+        
+        if modeData[2] == ESP.ColorMode then
+            btn.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+        end
+        table.insert(espColorButtons, btn)
+        
+        btn.MouseButton1Click:Connect(function()
+            ESP.ColorMode = modeData[2]
+            for _, b in pairs(espColorButtons) do
+                b.BackgroundColor3 = Color3.fromRGB(120, 70, 190)
+            end
+            btn.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+            UpdateESPColors()
+        end)
+    end
+    
+    local totalRows = math.ceil(#colorModes / 3)
+    local containerHeight = yOffset + totalRows * 28 + 30
+    espContainer.Size = UDim2.new(1, 0, 0, containerHeight)
+    
+    espToggleBtn.MouseButton1Click:Connect(function()
+        ESP.Enabled = not ESP.Enabled
+        if ESP.Enabled then
+            espStatusLabel.Text = "✅ ESP ВКЛЮЧЕН"
+            espStatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+            espToggleBtn.Text = "❌ ВЫКЛЮЧИТЬ"
+            espToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+            RefreshESP()
+        else
+            espStatusLabel.Text = "❌ ESP ОТКЛЮЧЕН"
+            espStatusLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+            espToggleBtn.Text = "🔮 ВКЛЮЧИТЬ"
+            espToggleBtn.BackgroundColor3 = Color3.fromRGB(140, 80, 220)
+            UpdateESPState()
+        end
+    end)
+    
+    toggleVisibilityBtn.MouseButton1Click:Connect(function()
+        espVisible = not espVisible
+        if espVisible then
+            toggleVisibilityBtn.Text = "▲"
+            espContainer.Size = UDim2.new(1, 0, 0, containerHeight)
+            espContainer.Visible = true
+        else
+            toggleVisibilityBtn.Text = "▼"
+            espContainer.Size = UDim2.new(1, 0, 0, 0)
+            espContainer.Visible = false
+        end
+    end)
+    
+    task.wait(0.5)
+    RefreshESP()
+end
+
+-- === КОНТЕНТ SETTINGS (НАСТРОЙКА БИНДА) ===
+local settingsBindBtn = nil
+
+local function CreateSettingsContent()
+    for _, child in ipairs(settingsContent:GetChildren()) do
+        child:Destroy()
+    end
+    
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 0, 35)
+    label.Position = UDim2.new(0, 0, 0, 5)
+    label.BackgroundTransparency = 1
+    label.Text = "⚙️ Настройки"
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 18
+    label.Parent = settingsContent
+    
+    local bindLabel = Instance.new("TextLabel")
+    bindLabel.Size = UDim2.new(1, 0, 0, 25)
+    bindLabel.Position = UDim2.new(0, 0, 0, 45)
+    bindLabel.BackgroundTransparency = 1
+    bindLabel.Text = "Клавиша открытия меню:"
+    bindLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
+    bindLabel.Font = Enum.Font.Gotham
+    bindLabel.TextSize = 14
+    bindLabel.Parent = settingsContent
+    
+    settingsBindBtn = Instance.new("TextButton")
+    settingsBindBtn.Size = UDim2.new(0.6, 0, 0, 40)
+    settingsBindBtn.Position = UDim2.new(0.2, 0, 0, 75)
+    settingsBindBtn.BackgroundColor3 = Color3.fromRGB(60, 30, 100)
+    settingsBindBtn.BackgroundTransparency = 0.2
+    settingsBindBtn.BorderSizePixel = 1
+    settingsBindBtn.BorderColor3 = Color3.fromRGB(200, 100, 255)
+    settingsBindBtn.Text = "Текущий: " .. Settings.OpenKey.Name
+    settingsBindBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    settingsBindBtn.Font = Enum.Font.GothamBold
+    settingsBindBtn.TextSize = 16
+    settingsBindBtn.Parent = settingsContent
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 10)
+    btnCorner.Parent = settingsBindBtn
+    
+    local waitingForBind = false
+    
+    settingsBindBtn.MouseButton1Click:Connect(function()
+        waitingForBind = true
+        settingsBindBtn.Text = "Нажми клавишу..."
+        settingsBindBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        settingsBindBtn.BorderColor3 = Color3.fromRGB(255, 100, 100)
+    end)
+    
+    -- Обработчик ввода для смены бинда
+    local bindConnection
+    bindConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if not waitingForBind then return end
+        if gameProcessed then return end
+        
+        -- Проверяем, что это клавиша (не мышь и не touch)
+        if input.UserInputType == Enum.UserInputType.Keyboard then
+            local key = input.KeyCode
+            if key ~= Enum.KeyCode.Unknown then
+                waitingForBind = false
+                Settings.OpenKey = key
+                settingsBindBtn.Text = "Текущий: " .. key.Name
+                settingsBindBtn.BackgroundColor3 = Color3.fromRGB(60, 30, 100)
+                settingsBindBtn.BorderColor3 = Color3.fromRGB(200, 100, 255)
+                updateHint()
+                -- Отключаем старую привязку, создаем новую (уже есть в основном цикле)
+                -- Но основная привязка уже использует Settings.OpenKey, так что все ок
+                bindConnection:Disconnect()
+                print("🔄 Бинд изменен на: " .. key.Name)
+            end
+        end
+    end)
+    
+    settingsContent.CanvasSize = UDim2.new(0, 0, 0, 130)
+end
 
 -- === ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ===
-tabUniversal.MouseButton1Click:Connect(function()
-    switchTab(true)
-end)
+local function switchTab(tab)
+    universalContent.Visible = false
+    tsbContent.Visible = false
+    settingsContent.Visible = false
+    
+    tabUniversal.BackgroundColor3 = Color3.fromRGB(150, 50, 255)
+    tabUniversal.BorderColor3 = Color3.fromRGB(150, 50, 255)
+    tabTSB.BackgroundColor3 = Color3.fromRGB(150, 50, 255)
+    tabTSB.BorderColor3 = Color3.fromRGB(150, 50, 255)
+    tabSettings.BackgroundColor3 = Color3.fromRGB(150, 50, 255)
+    tabSettings.BorderColor3 = Color3.fromRGB(150, 50, 255)
+    
+    if tab == "Universal" then
+        universalContent.Visible = true
+        tabUniversal.BackgroundColor3 = Color3.fromRGB(200, 100, 255)
+        tabUniversal.BorderColor3 = Color3.fromRGB(200, 100, 255)
+    elseif tab == "TSB" then
+        tsbContent.Visible = true
+        tabTSB.BackgroundColor3 = Color3.fromRGB(200, 100, 255)
+        tabTSB.BorderColor3 = Color3.fromRGB(200, 100, 255)
+        if #tsbContent:GetChildren() == 0 then
+            CreateTSBContent()
+        end
+    elseif tab == "Settings" then
+        settingsContent.Visible = true
+        tabSettings.BackgroundColor3 = Color3.fromRGB(200, 100, 255)
+        tabSettings.BorderColor3 = Color3.fromRGB(200, 100, 255)
+        if #settingsContent:GetChildren() == 0 then
+            CreateSettingsContent()
+        end
+    end
+end
 
-tabTSB.MouseButton1Click:Connect(function()
-    switchTab(false)
-end)
+tabUniversal.MouseButton1Click:Connect(function() switchTab("Universal") end)
+tabTSB.MouseButton1Click:Connect(function() switchTab("TSB") end)
+tabSettings.MouseButton1Click:Connect(function() switchTab("Settings") end)
 
 -- СТАТУС
 local status = Instance.new("TextLabel")
@@ -302,79 +876,23 @@ status.TextSize = 11
 status.TextXAlignment = Enum.TextXAlignment.Left
 status.Parent = frame
 
--- === АНИМАЦИЯ ПЕРЕТАСКИВАНИЯ ===
-local dragging = false
-local dragStart, startPos
-local currentTouch = nil
+-- === ОТКРЫТИЕ/ЗАКРЫТИЕ ПО КЛАВИШЕ ===
+local menuVisible = true
 
-local function startDrag(input)
-    dragging = true
-    dragStart = input.Position
-    startPos = frame.Position
-    
-    local tween = TweenService:Create(frame, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        BackgroundTransparency = 0.2,
-        BorderSizePixel = 3
-    })
-    tween:Play()
-    
-    if input.UserInputType == Enum.UserInputType.Touch then
-        currentTouch = input
-    end
-end
-
-local function stopDrag()
-    dragging = false
-    currentTouch = nil
-    
-    local tween = TweenService:Create(frame, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        BackgroundTransparency = 0.3,
-        BorderSizePixel = 2
-    })
-    tween:Play()
-end
-
-title.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        startDrag(input)
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Settings.OpenKey then
+        menuVisible = not menuVisible
+        frame.Visible = menuVisible
+        blur.Size = menuVisible and 8 or 0
+        print("💜 Меню " .. (menuVisible and "открыто" or "закрыто"))
     end
 end)
 
-title.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        stopDrag()
-    end
-end)
+-- === ИНИЦИАЛИЗАЦИЯ ===
+switchTab("Universal")
+frame.Visible = true
+blur.Size = 8
 
-UserInputService.InputChanged:Connect(function(input)
-    if not dragging then return end
-    
-    local delta
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        delta = input.Position - dragStart
-    elseif input.UserInputType == Enum.UserInputType.Touch and currentTouch then
-        delta = input.Position - dragStart
-    else
-        return
-    end
-    
-    local newX = startPos.X.Offset + delta.X
-    local newY = startPos.Y.Offset + delta.Y
-    frame.Position = UDim2.new(startPos.X.Scale, newX, startPos.Y.Scale, newY)
-end)
-
--- === ОТКРЫТИЕ ПО N ===
-local visible = false
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.N then
-        visible = not visible
-        animateMenu(visible)
-        print("💜 Меню " .. (visible and "открыто" or "закрыто"))
-    end
-end)
-
--- Инициализация
-switchTab(true)
-
-print("💜 PULSE VISUAL ЗАГРУЖЕН! Нажми N")
-print("✨ Ты Долбаеб")
+print("💜 PULSE VISUAL ЗАГРУЖЕН И ОТКРЫТ!")
+print("создатель ленивый")
