@@ -1,4 +1,4 @@
--- PULSE VISUAL - ФИНАЛЬНАЯ ВЕРСИЯ (БЕЗ ТЕМ, С НАСТРОЙКОЙ БИНДА)
+-- PULSE VISUAL - ДОБАВЛЕН XDEV HUB В TSB
 local player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
@@ -11,7 +11,7 @@ print("💜 Загрузка Pulse Visual...")
 
 -- === НАСТРОЙКИ ===
 local Settings = {
-    OpenKey = Enum.KeyCode.N, -- клавиша по умолчанию
+    OpenKey = Enum.KeyCode.N,
 }
 
 -- === GUI ===
@@ -52,7 +52,7 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 title.Parent = frame
 
--- ПОДСКАЗКА (будет обновляться)
+-- ПОДСКАЗКА
 local hint = Instance.new("TextLabel")
 hint.Size = UDim2.new(0, 100, 0, 20)
 hint.Position = UDim2.new(0.7, 0, 0.02, 0)
@@ -63,7 +63,6 @@ hint.Font = Enum.Font.Gotham
 hint.TextSize = 12
 hint.Parent = frame
 
--- Обновление подсказки
 local function updateHint()
     local keyName = Settings.OpenKey.Name
     hint.Text = "[" .. keyName .. "]"
@@ -147,7 +146,7 @@ tsbContent.Position = UDim2.new(0, 0, 0, 72)
 tsbContent.BackgroundTransparency = 1
 tsbContent.BorderSizePixel = 0
 tsbContent.Parent = frame
-tsbContent.CanvasSize = UDim2.new(0, 0, 0, 400)
+tsbContent.CanvasSize = UDim2.new(0, 0, 0, 500)
 tsbContent.ScrollBarThickness = 6
 tsbContent.ScrollBarImageColor3 = Color3.fromRGB(200, 100, 255)
 tsbContent.Visible = false
@@ -537,7 +536,7 @@ local function CreateTSBContent()
     toggleVisCorner.Parent = toggleVisibilityBtn
     
     espContainer = Instance.new("Frame")
-    espContainer.Size = UDim2.new(1, 0, 0, 400)
+    espContainer.Size = UDim2.new(1, 0, 0, 450)
     espContainer.Position = UDim2.new(0, 0, 0, 35)
     espContainer.BackgroundTransparency = 1
     espContainer.BorderSizePixel = 0
@@ -707,8 +706,68 @@ local function CreateTSBContent()
         end)
     end
     
-    local totalRows = math.ceil(#colorModes / 3)
-    local containerHeight = yOffset + totalRows * 28 + 30
+    yOffset = yOffset + math.ceil(#colorModes / 3) * 28 + 10
+    
+    -- === XDEV HUB ===
+    local xdevLabel = Instance.new("TextLabel")
+    xdevLabel.Size = UDim2.new(1, 0, 0, 25)
+    xdevLabel.Position = UDim2.new(0, 0, 0, yOffset)
+    xdevLabel.BackgroundTransparency = 1
+    xdevLabel.Text = "🚀 XDev Hub:"
+    xdevLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
+    xdevLabel.Font = Enum.Font.GothamBold
+    xdevLabel.TextSize = 14
+    xdevLabel.Parent = espContainer
+    
+    yOffset = yOffset + 30
+    
+    local xdevBtn = Instance.new("TextButton")
+    xdevBtn.Size = UDim2.new(0.9, 0, 0, 36)
+    xdevBtn.Position = UDim2.new(0.05, 0, 0, yOffset)
+    xdevBtn.BackgroundColor3 = Color3.fromRGB(140, 80, 220)
+    xdevBtn.BackgroundTransparency = 0.05
+    xdevBtn.BorderSizePixel = 1
+    xdevBtn.BorderColor3 = Color3.fromRGB(220, 180, 255)
+    xdevBtn.Text = "🔮 ЗАПУСТИТЬ XDEV HUB"
+    xdevBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    xdevBtn.Font = Enum.Font.GothamBold
+    xdevBtn.TextSize = 14
+    xdevBtn.Parent = espContainer
+    
+    local xdevGrad = Instance.new("UIGradient")
+    xdevGrad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(160, 100, 240)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 140, 255))
+    })
+    xdevGrad.Rotation = 45
+    xdevGrad.Parent = xdevBtn
+    
+    local xdevCorner = Instance.new("UICorner")
+    xdevCorner.CornerRadius = UDim.new(0, 10)
+    xdevCorner.Parent = xdevBtn
+    
+    local xdevActive = false
+    xdevBtn.MouseButton1Click:Connect(function()
+        xdevActive = not xdevActive
+        if xdevActive then
+            xdevBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 100)
+            xdevBtn.BorderColor3 = Color3.fromRGB(0, 255, 150)
+            xdevBtn.Text = "✅ XDEV HUB ЗАПУЩЕН"
+            print("🚀 Запуск XDev Hub...")
+            pcall(function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/Emerson2-creator/Scripts-Roblox/refs/heads/main/XDevHubBeta.lua"))()
+            end)
+        else
+            xdevBtn.BackgroundColor3 = Color3.fromRGB(140, 80, 220)
+            xdevBtn.BorderColor3 = Color3.fromRGB(220, 180, 255)
+            xdevBtn.Text = "🔮 ЗАПУСТИТЬ XDEV HUB"
+            print("🚀 XDev Hub выключен")
+        end
+    end)
+    
+    yOffset = yOffset + 46
+    
+    local containerHeight = yOffset + 10
     espContainer.Size = UDim2.new(1, 0, 0, containerHeight)
     
     espToggleBtn.MouseButton1Click:Connect(function()
@@ -799,13 +858,11 @@ local function CreateSettingsContent()
         settingsBindBtn.BorderColor3 = Color3.fromRGB(255, 100, 100)
     end)
     
-    -- Обработчик ввода для смены бинда
     local bindConnection
     bindConnection = UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if not waitingForBind then return end
         if gameProcessed then return end
         
-        -- Проверяем, что это клавиша (не мышь и не touch)
         if input.UserInputType == Enum.UserInputType.Keyboard then
             local key = input.KeyCode
             if key ~= Enum.KeyCode.Unknown then
@@ -815,8 +872,6 @@ local function CreateSettingsContent()
                 settingsBindBtn.BackgroundColor3 = Color3.fromRGB(60, 30, 100)
                 settingsBindBtn.BorderColor3 = Color3.fromRGB(200, 100, 255)
                 updateHint()
-                -- Отключаем старую привязку, создаем новую (уже есть в основном цикле)
-                -- Но основная привязка уже использует Settings.OpenKey, так что все ок
                 bindConnection:Disconnect()
                 print("🔄 Бинд изменен на: " .. key.Name)
             end
@@ -895,4 +950,5 @@ frame.Visible = true
 blur.Size = 8
 
 print("💜 PULSE VISUAL ЗАГРУЖЕН И ОТКРЫТ!")
-print("создатель ленивый")
+print("🚀 шахед")
+print("создатель ленивый") 
